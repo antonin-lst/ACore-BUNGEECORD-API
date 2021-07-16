@@ -1,0 +1,23 @@
+            ##################
+            #     Redis      #
+            ##################
+    
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+
+
+            ##################
+            #    Storage     #
+            ##################
+storage:
+  enable: true
+  type: "SQL" # SQL or JSON or SQLLITE
+
+  sql:
+    urlbase: "jdbc:mysql://"
+    host: "localhost"
+    database: ""
+    user: ""
+    pass: ""
