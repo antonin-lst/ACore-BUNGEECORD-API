@@ -1,6 +1,6 @@
 package fr.acore.bungeecord.api.config.color;
 
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 
 import java.util.ArrayList;
 import java.util.List;

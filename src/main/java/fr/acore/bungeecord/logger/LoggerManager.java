@@ -82,32 +82,27 @@ public class LoggerManager implements ILoggerManager {
 
     @Override
     public void logWarn(String... args) {
-        for(String message : args)
-            System.out.println(replaceAll(message, Levels.WARN));
+        getLogger().logWarn(args);
     }
 
     @Override
     public void logErr(String... args) {
-        for(String message : args)
-            System.err.println(replaceAll(message, Levels.ERR));
+        getLogger().logErr(args);
     }
 
     @Override
     public void log(Object... args) {
-        for(Object message : args)
-            System.out.println(replaceAll(message.toString(), Levels.INFO));
+        getLogger().log(args);
     }
 
     @Override
     public void logWarn(Object... args) {
-        for(Object message : args)
-            System.out.println(replaceAll(message.toString(), Levels.WARN));
+        getLogger().logWarn(args);
     }
 
     @Override
     public void logErr(Object... args) {
-        for(Object message : args)
-            System.err.println(replaceAll(message.toString(), Levels.ERR));
+        getLogger().logErr(args);
     }
 
     @Override

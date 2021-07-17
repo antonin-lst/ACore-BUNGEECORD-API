@@ -3,7 +3,7 @@ package fr.acore.bungeecord.api.manager;
 
 import fr.acore.bungeecord.api.logger.ILogger;
 import fr.acore.bungeecord.api.plugin.IPlugin;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 
 public interface IManager extends ILogger {
 

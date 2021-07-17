@@ -2,12 +2,12 @@ package fr.acore.bungeecord.api.config;
 
 
 import fr.acore.bungeecord.api.config.color.IColorHelper;
-import org.bukkit.configuration.file.FileConfiguration;
+import net.md_5.bungee.config.Configuration;
 
 public interface ISetupable<T> extends IColorHelper, IStringHelper{
 	
 	public T getKey();
-	public void setup(FileConfiguration config);
+	public void setup(Configuration config);
 	
 
 }

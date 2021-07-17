@@ -1,51 +1,54 @@
 package fr.acore.bungeecord.utils;
 
-public class TimerBuilder {
+import fr.acore.bungeecord.api.time.timer.ITimer;
 
-	private Long current;
-	private Long delay;
-	
+public class TimerBuilder implements ITimer {
+
+	private long current;
+	private long delay;
+
 	public TimerBuilder(long delay){
 		this(System.currentTimeMillis(), delay);
 	}
 
-	public TimerBuilder(Long current, Long delay) {
+	public TimerBuilder(long current, long delay) {
 		this.current = current;
 		this.delay = delay;
 	}
-	
-	public Long getCurrent() {
+
+	@Override
+	public long getCurrent() {
 		return current;
 	}
-	
-	public void setCurrent(Long current) {
+
+	@Override
+	public void setCurrent(long current) {
 		this.current = current;
 	}
 
-	public Long getDelay() {
+	@Override
+	public long getDelay() {
 		return delay;
 	}
-	
-	public void setDelay(Long delay) {
+
+	@Override
+	public void setDelay(long delay) {
 		this.delay = delay;
 	}
-	
-	public Long getPassedTime() {
-		return System.currentTimeMillis() - current;
-	}
-	
 
-	/*
-	public String getTimeToString() {
-		int delay = (int) ((getDelay() - getPassedTime())/1000);
-		return TimeUtils.setTimeToMessage(delay);
-	}*/
-	
-	public boolean hisFished() {
-		if(System.currentTimeMillis() - current >= delay) return true;
-		
-		return false;
+	@Override
+	public long getRemainingTime() {
+		return (current + delay) - System.currentTimeMillis();
 	}
 
-	
+	@Override
+	public String getFromatedRemainingTime() {
+		return timeToStringFromMiliSecondes(getRemainingTime());
+	}
+
+	@Override
+	public boolean isFinish() {
+		return getRemainingTime() <= 0;
+	}
+
 }

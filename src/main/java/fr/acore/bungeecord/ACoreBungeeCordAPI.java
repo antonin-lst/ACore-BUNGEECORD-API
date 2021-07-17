@@ -2,14 +2,27 @@ package fr.acore.bungeecord;
 
 import fr.acore.bungeecord.api.config.ISetupable;
 import fr.acore.bungeecord.api.manager.IManager;
+import fr.acore.bungeecord.api.manager.Informable;
 import fr.acore.bungeecord.api.plugin.IPlugin;
 import fr.acore.bungeecord.api.version.Version;
+import fr.acore.bungeecord.config.Setupable;
+import fr.acore.bungeecord.config.manager.ConfigManager;
+import fr.acore.bungeecord.config.utils.Conf;
+import fr.acore.bungeecord.jedis.manager.RedisManager;
+import fr.acore.bungeecord.jedis.packet.impl.server.InitServerPacket;
+import fr.acore.bungeecord.jedis.packet.impl.server.StopServerPacket;
+import fr.acore.bungeecord.jedis.packet.impl.server.UpdateServerPacket;
+import fr.acore.bungeecord.logger.LoggerManager;
 import net.md_5.bungee.api.plugin.Event;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
+import net.md_5.bungee.config.ConfigurationProvider;
+import net.md_5.bungee.config.YamlConfiguration;
 
 import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,75 +100,118 @@ public class ACoreBungeeCordAPI extends Plugin implements IPlugin<IManager> {
         //initialisation des managers
         managers = new ArrayList<>();
         //registration du Logger
-        registerManager(new LoggerManager(this));
+        registerManager(new LoggerManager(this, "[%date% ACoreBungeeCord] %message%"));
+
+        loadCustomConfig();
+        registerManager(new ConfigManager(this));
+        getInternalManager(ConfigManager.class).addSetupable(new Conf(this));
 
 
-    }
+        //registration du systeme de packet Redis
+        RedisManager redisManager;
+        registerManager(redisManager = new RedisManager(this));
+        //registration des packets //id 1 est pour le packet de test
+        //packets serveurs
+        redisManager.getPacketFactory().addPacket(2, InitServerPacket.class);
+        redisManager.syncCheckACoreMainPresence();
+        redisManager.getPacketFactory().addPacket(3, StopServerPacket.class);
+        redisManager.getPacketFactory().addPacket(4, UpdateServerPacket.class);
 
-    @Override
-    public void log(String... args) {
 
-    }
 
-    @Override
-    public void logWarn(String... args) {
-
-    }
-
-    @Override
-    public void logErr(String... args) {
-
-    }
-
-    @Override
-    public void log(Object... args) {
+        log("ACore BungeeCord Enabled");
 
     }
 
-    @Override
-    public void logWarn(Object... args) {
 
-    }
-
-    @Override
-    public void logErr(Object... args) {
-
-    }
+    /*
+     *
+     * Gestion du fichier de configuration
+     *
+     */
 
     @Override
-    public List<IManager> getInternalManagers() {
-        return null;
-    }
-
-    @Override
-    public <T extends IManager> T getInternalManager(Class<T> clazz) {
-        return null;
-    }
-
-    @Override
-    public <T extends IManager> T getManager(Class<T> clazz) {
-        return null;
-    }
-
-    @Override
-    public void registerManager(IManager manager) {
-
-    }
-
-    @Override
-    public void unregisterManager(IManager manager) {
-
-    }
-
-    @Override
-    public void loadCustomConfig() {
-
+    public void loadCustomConfig(){
+        if(!getDataFolder().exists()) getDataFolder().mkdir();
+        File configFile = new File(getDataFolder(), "config.yml");
+        try {
+            if(!configFile.exists()) {
+                InputStream in = getResourceAsStream("config.yml");
+                Files.copy(in, configFile.toPath());
+            }
+            config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(configFile);
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void reloadConfig() {
-
+        try {
+            File configFile = new File(getDataFolder(), "config.yml");
+            config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(configFile);
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
     }
+
+
+    /*
+     *
+     * Gestion des managers internes au ACoreSpigotAPI
+     *
+     *
+     */
+
+    @Override
+    public void registerManager(IManager manager) {
+        if(manager == null) { return;}
+
+        if(manager instanceof Setupable && ((Setupable) manager).getUseConfig()) registerSetupable((Setupable) manager);
+
+        if(manager instanceof Informable) {
+            ((Informable) manager).informe();
+        }
+
+        this.managers.add(manager);
+        log(manager.logEnabled());
+    }
+
+    @Override
+    public void unregisterManager(IManager manager) {
+        this.managers.remove(manager);
+    }
+
+    @Override
+    public List<IManager> getInternalManagers() {
+        return this.managers;
+    }
+
+    @Override
+    public <T extends IManager> T getInternalManager(Class<T> clazz) {
+        for(IManager manager : managers) {
+            if(manager.getClass().equals(clazz)) return (T) manager;
+        }
+        return null;
+    }
+
+
+    /*
+     *
+     * Gestion des Managers interne et externe
+     *
+     */
+
+    @Override
+    public <T extends IManager> T getManager(Class<T> clazz) {
+        IManager manager = getInternalManager(clazz);
+        if(manager == null) {
+            log("Trying to found manager on module");
+            //manager = getInternalManager(AModuleManager.class).getInModulesManager(clazz);
+        }
+        return (T) manager;
+    }
+
 
     @Override
     public void registerSetupable(ISetupable<IPlugin<?>> setupable) {
@@ -181,4 +237,43 @@ public class ACoreBungeeCordAPI extends Plugin implements IPlugin<IManager> {
     public void callEvent(Event event) {
 
     }
+
+    /*
+     *
+     * Gestion des logs
+     *
+     */
+
+    @Override
+    public void log(String... args) {
+        getInternalManager(LoggerManager.class).log(args);
+    }
+
+    @Override
+    public void log(Object... args) {
+        getInternalManager(LoggerManager.class).log(args);
+    }
+
+
+    @Override
+    public void logWarn(String... args) {
+        getInternalManager(LoggerManager.class).logWarn(args);
+    }
+
+    @Override
+    public void logWarn(Object... args) {
+        getInternalManager(LoggerManager.class).logWarn(args);
+    }
+
+    @Override
+    public void logErr(String... args) {
+        getInternalManager(LoggerManager.class).logErr(args);
+    }
+
+
+    @Override
+    public void logErr(Object... args) {
+        getInternalManager(LoggerManager.class).logErr(args);
+    }
+
 }
