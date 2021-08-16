@@ -11,6 +11,7 @@ import fr.acore.bungeecord.api.packet.IPacketFactory;
 import fr.acore.bungeecord.api.plugin.IPlugin;
 import fr.acore.bungeecord.api.time.timer.ITimer;
 import fr.acore.bungeecord.config.utils.Conf;
+import fr.acore.bungeecord.jedis.listener.RedisListener;
 import fr.acore.bungeecord.jedis.packet.RedisPacket;
 import fr.acore.bungeecord.jedis.packet.factory.RedisPacketFactory;
 import fr.acore.bungeecord.jedis.packet.impl.server.InitServerPacket;
@@ -33,6 +34,8 @@ public class RedisManager extends JedisPubSub implements IRedisPacketManager {
         this.jedis = new Jedis(Conf.getJedisHost(), Conf.getJedisPort());
         this.packetFactory = new RedisPacketFactory();
         this.jedisPublisher = new JedisPublisher(instance);
+        instance.registerListener(new RedisListener(this));
+
         if(!Conf.getJedisPassword().isEmpty()){
             jedis.auth(Conf.getJedisPassword());
         }

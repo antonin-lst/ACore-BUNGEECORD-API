@@ -9,10 +9,13 @@ import fr.acore.bungeecord.config.Setupable;
 import fr.acore.bungeecord.config.manager.ConfigManager;
 import fr.acore.bungeecord.config.utils.Conf;
 import fr.acore.bungeecord.jedis.manager.RedisManager;
+import fr.acore.bungeecord.jedis.packet.impl.player.PlayerJoinProxyPacket;
+import fr.acore.bungeecord.jedis.packet.impl.player.PlayerQuitProxyPacket;
 import fr.acore.bungeecord.jedis.packet.impl.server.InitServerPacket;
 import fr.acore.bungeecord.jedis.packet.impl.server.StopServerPacket;
 import fr.acore.bungeecord.jedis.packet.impl.server.UpdateServerPacket;
 import fr.acore.bungeecord.logger.LoggerManager;
+import fr.acore.bungeecord.module.manager.AModuleManager;
 import net.md_5.bungee.api.plugin.Event;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -116,8 +119,10 @@ public class ACoreBungeeCordAPI extends Plugin implements IPlugin<IManager> {
         redisManager.syncCheckACoreMainPresence();
         redisManager.getPacketFactory().addPacket(3, StopServerPacket.class);
         redisManager.getPacketFactory().addPacket(4, UpdateServerPacket.class);
+        redisManager.getPacketFactory().addPacket(5, PlayerJoinProxyPacket.class);
+        redisManager.getPacketFactory().addPacket(6, PlayerQuitProxyPacket.class);
 
-
+        registerManager(new AModuleManager(this));
 
         log("ACore BungeeCord Enabled");
 
@@ -225,7 +230,8 @@ public class ACoreBungeeCordAPI extends Plugin implements IPlugin<IManager> {
 
     @Override
     public Listener registerListener(Listener listener) {
-        return null;
+        getProxy().getPluginManager().registerListener(this, listener);
+        return listener;
     }
 
     @Override
