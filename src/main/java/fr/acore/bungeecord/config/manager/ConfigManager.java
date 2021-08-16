@@ -4,6 +4,7 @@ import fr.acore.bungeecord.ACoreBungeeCordAPI;
 import fr.acore.bungeecord.api.config.IConfigManager;
 import fr.acore.bungeecord.api.config.ISetupable;
 import fr.acore.bungeecord.api.plugin.IPlugin;
+import fr.acore.bungeecord.config.commands.ReloadCommand;
 import fr.acore.bungeecord.config.utils.Conf;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class ConfigManager implements IConfigManager<IPlugin<?>> {
 		this.plugin = plugin;
 		configParticipator = new HashMap<>();
 		addSetupable(conf = new Conf(plugin));
+		plugin.getProxy().getPluginManager().registerCommand(plugin, new ReloadCommand(plugin));
 	}
 	
 	/*
@@ -70,8 +72,12 @@ public class ConfigManager implements IConfigManager<IPlugin<?>> {
 	
 	@Override
 	public void reload() {
-		// TODO Auto-generated method stub
-		
+		for(Map.Entry<IPlugin<?>, List<ISetupable<IPlugin<?>>>> entry : this.configParticipator.entrySet()){
+			entry.getKey().reloadConfig();
+			for(ISetupable<IPlugin<?>> setupable : entry.getValue()){
+				setupable.setup(entry.getKey().getConfig());
+			}
+		}
 	}
 
 	@Override

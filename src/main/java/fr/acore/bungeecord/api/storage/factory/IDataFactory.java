@@ -3,6 +3,7 @@ package fr.acore.bungeecord.api.storage.factory;
 import fr.acore.bungeecord.api.manager.IManager;
 import fr.acore.bungeecord.api.storage.constraint.query.IQueryConstraint;
 import fr.acore.bungeecord.api.storage.table.ITable;
+import fr.acore.bungeecord.storage.constraint.QueryConstraint;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ public interface IDataFactory<T, U extends IManager> {
 	public void insert(T data);
 	public void delete(T data);
 	public void update(T data);
-	public List<T> select(IQueryConstraint queryConstraint);
-	public T selectFirst(IQueryConstraint queryConstraint);
+	public List<T> select(QueryConstraint queryConstraint);
+	public T selectFirst(QueryConstraint queryConstraint);
 	
 }

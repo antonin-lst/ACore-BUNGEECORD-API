@@ -4,6 +4,11 @@ import fr.acore.bungeecord.api.config.ISetupable;
 import fr.acore.bungeecord.api.manager.IManager;
 import fr.acore.bungeecord.api.manager.Informable;
 import fr.acore.bungeecord.api.plugin.IPlugin;
+import fr.acore.bungeecord.api.storage.database.DBUser;
+import fr.acore.bungeecord.api.storage.database.IDatabase;
+import fr.acore.bungeecord.api.storage.database.driver.DatabaseDriver;
+import fr.acore.bungeecord.api.storage.exception.DBNotFoundException;
+import fr.acore.bungeecord.api.storage.exception.schema.SchemaNotFounException;
 import fr.acore.bungeecord.api.version.Version;
 import fr.acore.bungeecord.config.Setupable;
 import fr.acore.bungeecord.config.manager.ConfigManager;
@@ -16,6 +21,8 @@ import fr.acore.bungeecord.jedis.packet.impl.server.StopServerPacket;
 import fr.acore.bungeecord.jedis.packet.impl.server.UpdateServerPacket;
 import fr.acore.bungeecord.logger.LoggerManager;
 import fr.acore.bungeecord.module.manager.AModuleManager;
+import fr.acore.bungeecord.storage.StorageManager;
+import fr.acore.bungeecord.storage.database.MySqlDatabase;
 import net.md_5.bungee.api.plugin.Event;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -109,6 +116,22 @@ public class ACoreBungeeCordAPI extends Plugin implements IPlugin<IManager> {
         registerManager(new ConfigManager(this));
         getInternalManager(ConfigManager.class).addSetupable(new Conf(this));
 
+        try {
+            //création du storage en fonction de la configuration (config.yml) !! support actuelle MYSQL !!
+            IDatabase<?> database = Conf.getStorageType().equals(DatabaseDriver.MYSQL) ? new MySqlDatabase("maindb", new DBUser(Conf.getUser(), Conf.getPass()), Conf.getHost()) : null;
+            StorageManager storageM = new StorageManager(this, database);
+            storageM.load();
+
+            //registration du storage
+            registerManager(storageM);
+
+            //registration de la base de donnée par default
+            storageM.setDefaultDatabase("maindb");
+
+            //registration du schema en configuration
+            storageM.getDefaultDatabase().addSchema(Conf.getDatabase());
+            storageM.getDefaultDatabase().setDefaultSchema(Conf.getDatabase());
+        } catch (DBNotFoundException | SchemaNotFounException e) {e.printStackTrace();}
 
         //registration du systeme de packet Redis
         RedisManager redisManager;
@@ -122,12 +145,23 @@ public class ACoreBungeeCordAPI extends Plugin implements IPlugin<IManager> {
         redisManager.getPacketFactory().addPacket(5, PlayerJoinProxyPacket.class);
         redisManager.getPacketFactory().addPacket(6, PlayerQuitProxyPacket.class);
 
+        //registration du systeme de module
         registerManager(new AModuleManager(this));
 
-        log("ACore BungeeCord Enabled");
+        long enablingTime = System.currentTimeMillis() - startMillis;
 
+        log("Enabled took : " + enablingTime + "ms");
     }
 
+    @Override
+    public void onDisable() {
+        /*
+         * Save and disable Storage
+         *
+         */
+        getInternalManager(StorageManager.class).save();
+
+    }
 
     /*
      *
