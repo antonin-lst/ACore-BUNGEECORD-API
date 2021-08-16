@@ -13,6 +13,8 @@ import fr.acore.bungeecord.api.version.Version;
 import fr.acore.bungeecord.config.Setupable;
 import fr.acore.bungeecord.config.manager.ConfigManager;
 import fr.acore.bungeecord.config.utils.Conf;
+import fr.acore.bungeecord.cryptographie.CryptoManager;
+import fr.acore.bungeecord.cryptographie.CryptoType;
 import fr.acore.bungeecord.jedis.manager.RedisManager;
 import fr.acore.bungeecord.jedis.packet.impl.player.PlayerJoinProxyPacket;
 import fr.acore.bungeecord.jedis.packet.impl.player.PlayerQuitProxyPacket;
@@ -132,6 +134,9 @@ public class ACoreBungeeCordAPI extends Plugin implements IPlugin<IManager> {
             storageM.getDefaultDatabase().addSchema(Conf.getDatabase());
             storageM.getDefaultDatabase().setDefaultSchema(Conf.getDatabase());
         } catch (DBNotFoundException | SchemaNotFounException e) {e.printStackTrace();}
+
+        //registration du syteme de cryptographie
+        registerManager(new CryptoManager(this, CryptoType.BCRYPT));
 
         //registration du systeme de packet Redis
         RedisManager redisManager;
