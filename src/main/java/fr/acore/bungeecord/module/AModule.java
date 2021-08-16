@@ -77,7 +77,7 @@ public class AModule extends Plugin implements IModule, IPlugin<AManager> {
 	public void onEnable() {
 		this.instance = ACoreBungeeCordAPI.getInstance();
 		this.managers = new ArrayList<>();
-		reloadConfig();
+		loadCustomConfig();
 		getManager(AModuleManager.class).addModule(this);
 	}
 	
