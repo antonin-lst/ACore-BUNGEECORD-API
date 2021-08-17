@@ -5,6 +5,7 @@ import fr.acore.bungeecord.api.config.ISetupable;
 import fr.acore.bungeecord.api.logger.ILogger;
 import fr.acore.bungeecord.api.manager.IManager;
 import fr.acore.bungeecord.api.manager.IManagerCollection;
+import fr.acore.bungeecord.api.storage.factory.IDataFactory;
 import fr.acore.bungeecord.api.version.Version;
 import net.md_5.bungee.api.plugin.Event;
 import net.md_5.bungee.api.plugin.Listener;
@@ -61,7 +62,7 @@ public interface IPlugin<T extends IManager> extends IManagerCollection<T>, ILog
 	 * 
 	 */
 	
-	//public void registerDataFactory(IDataFactory<?,?> factory);
+	public void registerDataFactory(IDataFactory<?,?> factory);
 	
 	
 	/*

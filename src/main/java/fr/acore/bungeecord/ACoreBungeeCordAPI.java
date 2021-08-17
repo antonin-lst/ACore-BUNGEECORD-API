@@ -9,6 +9,7 @@ import fr.acore.bungeecord.api.storage.database.IDatabase;
 import fr.acore.bungeecord.api.storage.database.driver.DatabaseDriver;
 import fr.acore.bungeecord.api.storage.exception.DBNotFoundException;
 import fr.acore.bungeecord.api.storage.exception.schema.SchemaNotFounException;
+import fr.acore.bungeecord.api.storage.factory.IDataFactory;
 import fr.acore.bungeecord.api.version.Version;
 import fr.acore.bungeecord.config.Setupable;
 import fr.acore.bungeecord.config.manager.ConfigManager;
@@ -281,6 +282,11 @@ public class ACoreBungeeCordAPI extends Plugin implements IPlugin<IManager> {
     @Override
     public void callEvent(Event event) {
 
+    }
+
+    @Override
+    public void registerDataFactory(IDataFactory<?, ?> factory) {
+        getInternalManager(StorageManager.class).addDataFactory(factory);
     }
 
     /*

@@ -4,6 +4,7 @@ import fr.acore.bungeecord.api.config.ISetupable;
 import fr.acore.bungeecord.api.manager.IManager;
 import fr.acore.bungeecord.api.manager.IManagerCollection;
 import fr.acore.bungeecord.api.plugin.IPlugin;
+import fr.acore.bungeecord.api.storage.factory.IDataFactory;
 import fr.acore.bungeecord.api.version.Version;
 import fr.acore.bungeecord.config.Setupable;
 import net.md_5.bungee.api.plugin.Event;
@@ -139,6 +140,11 @@ public class AManager extends Setupable implements IManager, IManagerCollection<
 
 	public long getStartMillis() {
 		return key.getStartMillis();
+	}
+
+
+	public void registerDataFactory(IDataFactory<?, ?> factory) {
+		key.registerDataFactory(factory);
 	}
 	
 	/*

@@ -222,7 +222,11 @@ public class AModule extends Plugin implements IModule, IPlugin<AManager> {
 		instance.callEvent(event);
 	}
 
-	
+	@Override
+	public void registerDataFactory(IDataFactory<?, ?> factory) {
+		instance.registerDataFactory(factory);
+	}
+
 	/*
 	 * 
 	 * Gestion des logs
