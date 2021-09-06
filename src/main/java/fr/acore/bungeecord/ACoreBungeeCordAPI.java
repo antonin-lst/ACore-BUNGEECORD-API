@@ -17,11 +17,16 @@ import fr.acore.bungeecord.config.utils.Conf;
 import fr.acore.bungeecord.cryptographie.CryptoManager;
 import fr.acore.bungeecord.cryptographie.CryptoType;
 import fr.acore.bungeecord.jedis.manager.RedisManager;
+import fr.acore.bungeecord.jedis.packet.impl.bungee.AddLobbyServerPacket;
+import fr.acore.bungeecord.jedis.packet.impl.bungee.RemoveLobbyServerPacket;
+import fr.acore.bungeecord.jedis.packet.impl.player.PlayerChangeServerPacket;
 import fr.acore.bungeecord.jedis.packet.impl.player.PlayerJoinProxyPacket;
 import fr.acore.bungeecord.jedis.packet.impl.player.PlayerQuitProxyPacket;
+import fr.acore.bungeecord.jedis.packet.impl.player.SendPlayerMessagePacket;
 import fr.acore.bungeecord.jedis.packet.impl.server.InitServerPacket;
 import fr.acore.bungeecord.jedis.packet.impl.server.StopServerPacket;
 import fr.acore.bungeecord.jedis.packet.impl.server.UpdateServerPacket;
+import fr.acore.bungeecord.lobby.LobbyManager;
 import fr.acore.bungeecord.logger.LoggerManager;
 import fr.acore.bungeecord.module.manager.AModuleManager;
 import fr.acore.bungeecord.storage.StorageManager;
@@ -139,6 +144,8 @@ public class ACoreBungeeCordAPI extends Plugin implements IPlugin<IManager> {
         //registration du syteme de cryptographie
         registerManager(new CryptoManager(this, CryptoType.BCRYPT));
 
+        //registration du systeme de lobby
+        registerManager(new LobbyManager(this));
         //registration du systeme de packet Redis
         RedisManager redisManager;
         registerManager(redisManager = new RedisManager(this));
@@ -150,6 +157,15 @@ public class ACoreBungeeCordAPI extends Plugin implements IPlugin<IManager> {
         redisManager.getPacketFactory().addPacket(4, UpdateServerPacket.class);
         redisManager.getPacketFactory().addPacket(5, PlayerJoinProxyPacket.class);
         redisManager.getPacketFactory().addPacket(6, PlayerQuitProxyPacket.class);
+        redisManager.getPacketFactory().addPacket(7, PlayerChangeServerPacket.class);
+        redisManager.getPacketFactory().addPacket(8, SendPlayerMessagePacket.class);
+
+      //  redisManager.getPacketFactory().addPacket(8, AddPlayerToServerQueuePacket.class);
+     //   redisManager.getPacketFactory().addPacket(9, RemovePlayerToServerQueuePacket.class);
+
+        redisManager.getPacketFactory().addPacket(11, AddLobbyServerPacket.class);
+        redisManager.getPacketFactory().addPacket(12, RemoveLobbyServerPacket.class);
+
 
         //registration du systeme de module
         registerManager(new AModuleManager(this));

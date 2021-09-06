@@ -1,8 +1,11 @@
 package fr.acore.bungeecord.jedis.listener;
 
+import fr.acore.bungeecord.ACoreBungeeCordAPI;
 import fr.acore.bungeecord.jedis.manager.RedisManager;
 import fr.acore.bungeecord.jedis.packet.impl.player.PlayerJoinProxyPacket;
 import fr.acore.bungeecord.jedis.packet.impl.player.PlayerQuitProxyPacket;
+import fr.acore.bungeecord.lobby.LobbyManager;
+import fr.acore.bungeecord.utils.PremiumUtils;
 import io.netty.handler.proxy.ProxyConnectionEvent;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -19,26 +22,28 @@ import java.util.Map;
 
 public class RedisListener implements Listener {
 
-    private RedisManager manager;
+    private ACoreBungeeCordAPI instance;
 
     private Map<ProxiedPlayer, String> targetServers;
 
-    public RedisListener(RedisManager manager){
-        this.manager = manager;
+    public RedisListener(ACoreBungeeCordAPI instance){
+        this.instance = instance;
         this.targetServers = new HashMap<>();
     }
 
     @EventHandler
     public void onPostLoginEvent(PostLoginEvent event){
-        String defaultServer = "Lobby-01";
+        String defaultServer = instance.getManager(LobbyManager.class).getFutureLobby().getName();
         targetServers.put(event.getPlayer(), defaultServer);
-        manager.sendPacket(new PlayerJoinProxyPacket(event.getPlayer().getUniqueId().toString(), event.getPlayer().getDisplayName(), defaultServer));
+        instance.getManager(RedisManager.class).sendPacket(new PlayerJoinProxyPacket(PremiumUtils.generateOfflineId(event.getPlayer().getDisplayName()).toString(), event.getPlayer().getDisplayName(), defaultServer));
     }
 
     @EventHandler
     public void onServerConnect(ServerConnectEvent event){
-        event.setTarget(ProxyServer.getInstance().getServerInfo(targetServers.get(event.getPlayer())));
-        targetServers.remove(event.getPlayer());
+        if(targetServers.containsKey(event.getPlayer())){
+            event.setTarget(ProxyServer.getInstance().getServerInfo(targetServers.get(event.getPlayer())));
+            targetServers.remove(event.getPlayer());
+        }
     }
 
     @EventHandler
@@ -46,7 +51,7 @@ public class RedisListener implements Listener {
         if(targetServers.containsKey(event.getPlayer())){
             targetServers.remove(event.getPlayer());
         }
-        manager.sendPacket(new PlayerQuitProxyPacket(event.getPlayer().getUniqueId().toString()));
+        instance.getManager(RedisManager.class).sendPacket(new PlayerQuitProxyPacket(PremiumUtils.generateOfflineId(event.getPlayer().getDisplayName()).toString()));
     }
 
 

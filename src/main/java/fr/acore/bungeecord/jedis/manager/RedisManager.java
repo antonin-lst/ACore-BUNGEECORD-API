@@ -34,7 +34,7 @@ public class RedisManager extends JedisPubSub implements IRedisPacketManager {
         this.jedis = new Jedis(Conf.getJedisHost(), Conf.getJedisPort());
         this.packetFactory = new RedisPacketFactory();
         this.jedisPublisher = new JedisPublisher(instance);
-        instance.registerListener(new RedisListener(this));
+        instance.registerListener(new RedisListener(instance));
 
         if(!Conf.getJedisPassword().isEmpty()){
             jedis.auth(Conf.getJedisPassword());
